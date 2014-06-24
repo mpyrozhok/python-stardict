@@ -190,6 +190,9 @@ class IdxFileReader(object):
             index.append(self._index_idx[number][1:])
         return index
 
+    def get_all_words(self):
+        return [w.decode('utf8') for w in self._word_idx.keys()]
+
 
 class SynFileReader(object):
     """Read infomation from .syn file and form a dictionary as below:
@@ -301,6 +304,12 @@ class DictFileReader(object):
         else:
             return self._get_entry(size)
 
+    def get_all_words(self):
+        """Return a list of all words contained in the dictionary.
+        """
+        return self._dict_index.get_all_words()
+
+
     def _get_entry(self, size):
         result = dict()
         read_size = 0
@@ -376,25 +385,18 @@ def read_ifo_file(filename):
 def read_dict_info():
     """
     """
-    ifo_file = "stardict-cedict-gb-2.4.2/cedict-gb.ifo"
-    idx_file = "stardict-cedict-gb-2.4.2/cedict-gb.idx"
-    dict_file = "stardict-cedict-gb-2.4.2/cedict-gb.dict.dz"
-    ifo_reader = IfoFileReader(ifo_file)
-    idx_reader = IdxFileReader(idx_file)
-    dict_reader = DictFileReader(dict_file, ifo_reader, idx_reader, True)
-    print dict_reader.get_dict_by_index(31933)
-    print dict_reader.get_dict_by_word("鼻饲法")
+    dict_reader = get_dict("UniversalRuUk", compressed=False)
+    print "Words in dictionary: {0}".format(
+        len(dict_reader.get_all_words()))
 
 
-def get_dict(path):
-    ifo_file = path + ".ifo"
-    idx_file = path + ".idx"
-    dict_file = path + ".dict.dz"
+def get_dict(name, compressed=True):
+    ifo_file = name + ".ifo"
+    idx_file = name + ".idx"
+    dict_file = name + ".dict.dz"
     ifo_reader = IfoFileReader(ifo_file)
-    idx_reader = IdxFileReader(idx_file)
+    idx_reader = IdxFileReader(idx_file, compressed=compressed)
     return DictFileReader(dict_file, ifo_reader, idx_reader, True)
 
-# read_ifo_file("stardict-cedict-gb-2.4.2/cedict-gb.ifo")
-# read_idx_file("stardict-cedict-gb-2.4.2/cedict-gb.idx")
 if __name__ == "__main__":
     read_dict_info()
